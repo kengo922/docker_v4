@@ -72,3 +72,95 @@ jobs:
 # command: コマンドを設定する
 
 # カバーしている範囲。または、テストカバレッジ（テストにおいて全体のどれくらいの確認が終わったか）のこと。
+
+
+
+
+
+# version: 2.1
+
+# executors: #executors: jobsで再利用可能な実行環境を定義する
+#   default:  
+#     working_directory: ~/repo
+#     docker:
+#       - image: circleci/ruby:2.5.1-node-browsers
+#         environment:
+#           - BUNDLER_VERSION: 2.1.4
+#       - image: circleci/mysql:5.7
+#         environment:
+#           - MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+#           - MYSQL_ROOT_HOST: '%'
+
+# commands:
+#   setup:
+#     steps:
+#       - checkout
+#       - restore_cache:
+#           keys:
+#             - v1-dependencies-{{ checksum "Gemfile.lock" }}
+#             - v1-dependencies-
+#       - run:
+#           name: install dependencies
+#           command: |
+#             gem install bundler -v 2.1.4
+#             bundle install --jobs=4 --retry=3 --path vendor/bundle
+#       - save_cache:
+#           paths:
+#             - ./vendor/bundle
+#           key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+
+# jobs:
+#   test:
+#     executor: default
+#     environment:
+#       RAILS_ENV: test
+#     steps:
+#       - setup
+#       - run: mv config/database.yml.ci config/database.yml 
+#       - run: bundle exec rake db:create
+#       - run: bundle exec rake db:schema:load
+
+#       - run:
+#           name: Rubocop
+#           command: bundle exec rubocop
+
+#       - run:
+#           name: run tests
+#           command: |
+#             mkdir /tmp/test-results
+#             TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | \
+#               circleci tests split --split-by=timings)"
+#             bundle exec rspec \
+#               --format progress \
+#               --format RspecJunitFormatter \
+#               --out /tmp/test-results/rspec.xml \
+#               --format progress \
+#               $TEST_FILES
+
+#       - store_test_results:
+#           path: /tmp/test-results
+#       - store_artifacts:
+#           path: /tmp/test-results
+#           destination: test-results
+
+#   deploy:
+#     executor: default
+#     steps:
+#       - setup
+#       - add_ssh_keys:
+#           fingerprints:
+#             - "XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX"
+#       - deploy:
+#           name: Capistrano deploy
+#           command: bundle exec cap production deploy
+
+# workflows:
+#   test_and_deploy:
+#     jobs:
+#       - test
+#       - deploy:
+#           requires:
+#             - test
+#           filters:
+#             branches:
+#               only: master
